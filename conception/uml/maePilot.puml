@@ -1,0 +1,21 @@
+@startuml
+skinparam monochrome true
+skinparam packageStyle rect
+skinparam shadowing false
+
+[*] --> Idle
+
+Idle --> Detection : setRobotVelocity(vel) /\nbump = hasBumped(); evalutateBump()
+Idle --> Emergency : toggleES() / sendMvt(0)
+
+Running --> Running : setRobotVelocity(vel) / sendMvt(vel);\nevalutateVel()
+Running --> Idle : eventStopped() / sendMvt(0);\nresetTimeout(TOBump)
+Running --> Detection : TOBump() / bump = hasBumped();\nevaluateBump()
+Running --> Emergency : toggleES() / sendMvt(0);\nresetTimeout(TOBump)
+
+Detection --> Running : notBumped() / setTimeout(TOBump)
+Detection --> Idle : bumped() / \nsendMvt(0)
+
+Emergency --> Idle : toggleES() / \nsendMvt(0)
+
+@enduml

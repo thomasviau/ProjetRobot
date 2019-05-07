@@ -1,0 +1,152 @@
+@startuml
+
+hide circle
+skinparam classAttributeIconSize 0
+skinparam monochrome true
+skinparam packageStyle rect
+skinparam shadowing false
+
+class RemoteUI << active >> {
+    myIp : Ip
+    myVel : VelocityVector
+    myCurrentScreen : IdScreen
+    currentEventNumber : Indice
+    previousEventNumber : Indice
+    myEvents : Event[]
+    --
+    + start()
+    + stop()
+    + setIP(Ip)
+    + toggleEmergencyStop()
+    + setDir(Direction)
+    + validate()
+    + setPilotState() : PilotState
+    + setEvents(from:Indice,to:Indice) : Event[]
+    + setEventsCount():Indice
+    - translate(Direction) : VelocityVector
+- displayScreen(idScreen)
+}
+
+class Pilot << active >> {
+    - currentVel : VelocityVector
+    - myPilotState : PilotState
+    --
+    + setVelocity(vel: VelocityVector)
+    + askPilotState() : PilotState
+    + toggleEmergencyStop()
+    - sendMvt(VelocityVector)
+    - computeMvt(VelocityVector,WheelVelocity,WheelVelocity)
+}
+
+class Robot << protected >>{
+    mySensorsState : SensorsState
+    mySpeed : Speed
+    --
+    + setWheelsVelocity(vr: WheelVelocity,vl: WheelVelocity)
+    + askRobotSpeed() : Speed
+    + askSensorsState() : SensorsState
+    + hasBumped(): Boolean
+}
+
+class Logger << active >>{
+    - myEvents : Event[]
+    --
+    + start()
+    + stop()
+    + askEvents(from:Indice,to:Indice) : Event[]
+    + askEventsCount() : Indice
+    + clear()
+    + setRobotSpeed() : Speed
+    + setSensorsState() : SensorsState
+    - appendEvent(SensorsState,Speed)
+}
+
+class AdminUI << active >>{
+    myVel : VelocityVector
+    myCurrentScreen : IdScreen
+    currentEventNumber : Indice
+    previousEventNumber : Indice
+    myEvents : Event[]
+    --
+    + start()
+    + stop()
+    + toggleEmergencyStop()
+    + ask4Log()
+    + backMainSreen()
+    + clearlog()
+    + setDir(dir)
+    + setEvents(from:Indice,to:Indice) : Event[]
+    - translate(Direction) : VelocityVector
+    - displayScreen(idScreen)
+    - displayEvents(event[])
+}
+
+class ProxyPilot{
+--
+    + setVelocity()
+    + toggleEmergencyStop()
+    + askPilotState()
+}
+
+class ProxyLogger{
+    --
+    + askEvents(from:Indice,to:Indice) : Event[]
+    + askEventsCount() : Indice
+    }
+    class ProxyRemoteUI{
+    --
+    + setPilotState()
+    + setEvents(from:Indice,to:Indice) : Event[]
+    + setEventsCount():Indice
+}
+
+class DispatcherTelco {
+    --
+    + setPilotState()
+    + setEvents(from:Indice,to:Indice) : Event[]
+    + setEventsCount():Indice
+    + decode()
+}
+
+class DispatcherCommando {
+    --
+    + askEvents(from:Indice,to:Indice) : Event[]
+    + askEventsCount() : Indice
+    + setVelocity()
+    + toggleEmergencyStop()
+    + askPilotState()
+    + decode()
+}
+
+class Postman {
+    --
+    + readMsg()
+    + sendMsg()
+}
+
+class ErrorManager{
+    --
+    + printError()
+}
+
+Pilot "1"--> "1 \nmyRobot" Robot : > controls
+AdminUI "1" --> "1 \nmyPilot" Pilot : > controls
+AdminUI "1"--> "1 \nmyLogger" Logger : > poll
+Robot "1 \nmyRobot" <-- "1" Logger : < poll
+RemoteUI "1"--> "1 \nmyPilot" Pilot: > controls
+RemoteUI "1"--> "1 \nmyLogger" Logger : > poll
+
+RemoteUI "1"--> "1" ProxyPilot
+RemoteUI "1"--> "1" ProxyLogger
+ProxyPilot "1"--> "1" Postman
+ProxyLogger "1"--> "1" Postman
+DispatcherTelco "1"--> "1" RemoteUI
+Postman "1"--> "1" DispatcherTelco
+
+Pilot "1"--> "1" ProxyRemoteUI
+Logger "1"--> "1" ProxyRemoteUI
+ProxyRemoteUI "1"--> "1" Postman
+DispatcherCommando "1"--> "1" Pilot
+DispatcherCommando "1"--> "1" Logger
+Postman "1"--> "1" DispatcherCommando
+@enduml

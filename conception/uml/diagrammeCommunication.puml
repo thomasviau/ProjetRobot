@@ -1,0 +1,47 @@
+@startuml
+
+skinparam monochrome true
+skinparam packageStyle rect
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+
+package Telco {
+    package ComTelco {
+        object "<u>pilot:ProxyPilot</u>" as proxyPilot
+        object "<u>dispatcherTelco: Dispatcher</u>" as dispatcherTelco
+        object "<u>postmanTelco:Postman</u>\n<<medium>>\n<<active>>" as postmanTelco
+    }
+    
+    object "<u>remoteUI:RemoteUI</u>" as remoteUI
+}
+
+
+
+
+package Commando {
+    package ComCommando {
+        object "<u>remoteUI:ProxyRemoteUI</u>" as proxyRemoteUI
+        object "<u>dispatcherCommando: Dispatcher</u>" as dispatcherCommando
+        object "<u>postmanCommando:Postman</u>\n<<medium>>\n<<active>>" as postmanCommando
+    }
+
+    object "<u>pilot:Pilot</u>" as pilot
+}
+
+postmanCommando : serverSocketNew()\nserverSocketStart(ServerSocket)\nserverSocketStop(ServerSocket)\nserverSocketFree(ServerSocket)\nsendRequest(ServerSocket, Data)\nreceiveRequest(ServerSocket)
+postmanTelco : clientSocketNew()\nclientSocketStart(ClientSocket)\nclientSocketStop(ClientSocket)\nclientSocketFree(ClientSocket)\nsendRequest(ClientSocket,Data)\nreceiveRequest(ClientSocket)
+dispatcherTelco : decode()
+dispatcherCommando : decode()
+
+
+remoteUI -down-> proxyPilot
+dispatcherTelco -up-> remoteUI
+proxyPilot -down-> postmanTelco
+postmanTelco -up-> dispatcherTelco
+proxyRemoteUI -up-> postmanCommando
+postmanTelco <-[hidden]-> postmanCommando
+postmanCommando -down-> dispatcherCommando
+dispatcherCommando -down-> pilot
+pilot -up-> proxyRemoteUI
+
+@enduml
