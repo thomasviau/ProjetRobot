@@ -1,0 +1,1 @@
+/usr/bin/cc -g   CMakeFiles/commando.dir/main.c.o  -o commando -lpthread -lrt 

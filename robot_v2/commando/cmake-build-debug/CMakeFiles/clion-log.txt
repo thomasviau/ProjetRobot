@@ -1,0 +1,4 @@
+/home/viauthom/JetBrains/clion-2018.3.4/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" /home/viauthom/Documents/SE/C/RobotS8/robot_v2/commando
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/viauthom/Documents/SE/C/RobotS8/robot_v2/commando/cmake-build-debug

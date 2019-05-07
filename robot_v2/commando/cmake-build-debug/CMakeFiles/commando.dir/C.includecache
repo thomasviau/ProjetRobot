@@ -1,0 +1,24 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/viauthom/Documents/SE/C/RobotS8/robot_v2/commando/main.c
+stdlib.h
+-
+stdio.h
+-
+robot/pilot.h
+/home/viauthom/Documents/SE/C/RobotS8/robot_v2/commando/robot/pilot.h
+
+/home/viauthom/Documents/SE/C/RobotS8/robot_v2/commando/robot/pilot.h
+../watchdog.h
+/home/viauthom/Documents/SE/C/RobotS8/robot_v2/commando/watchdog.h
+
+/home/viauthom/Documents/SE/C/RobotS8/robot_v2/commando/watchdog.h
+stdint.h
+-
+
