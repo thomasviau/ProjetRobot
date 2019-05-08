@@ -30,13 +30,18 @@
 
 union MsgAdapterT{
     char buffer[MSG_SIZE];
-    int msg;
+    Param param;
 };
 
 struct PostmanCommandoT {};
 
 union ParamT {
-    int value;
+    PilotState pilotState;
+    VelocityVector vel;
+    int from;
+    int to;
+    int indice;
+    int idMethod;
 };
 
 int socketListen;
@@ -128,7 +133,7 @@ static const char * actionGetName(int i) {
  *
  * @retval no retval
  */
-static void actionNop(void) {
+static void actionNop(Param param) {
     //noting to do
 }
 
@@ -137,7 +142,7 @@ static void actionNop(void) {
  *
  * @retval no retval
  */
-static void actionInit(void) {
+static void actionInit(Param param) {
     socketListen = socket(AF_INET, SOCK_STREAM, 0);
     STOP_ON_ERROR(socketListen < 0);
     myAddress.sin_family = AF_INET;
@@ -151,7 +156,7 @@ static void actionInit(void) {
  *
  * @retval no retval
  */
-static void actionConnect(void) {
+static void actionConnect(Param param) {
     int err = bind(socketListen, (struct sockaddr *)&myAddress, sizeof(myAddress));
     STOP_ON_ERROR(err < 0);
 
@@ -169,7 +174,7 @@ static void actionConnect(void) {
  *
  * @retval no retval
  */
-static void actionCreateReadThread(void) {
+static void actionCreateReadThread(Param param) {
     int err = pthread_create(&thread, NULL, actionReceiveMsg, NULL);
     STOP_ON_ERROR(err == -1);
 }
@@ -184,10 +189,8 @@ static void* actionReceiveMsg(void){
     while (1){
         int err = read(socketData, &msgAdapter.buffer, sizeof(msgAdapter.buffer));
         STOP_ON_ERROR(err < 0);
-        printf("Received: %d\n", msgAdapter.msg);
-        //dispatcherCommandoDecode(msgAdapter.msg);
-
-        if (msgAdapter.msg == 0){
+        dispatcheCommandoMqSend(msgAdapter.param);
+        if (msgAdapter.param == 0){
             break;
         }
     }
@@ -198,12 +201,11 @@ static void* actionReceiveMsg(void){
  *
  * @retval no retval
  */
-static void actionSendMsg(int msg){
+static void actionSendMsg(Param param){
     MsgAdapter msgAdapter;
-    msgAdapter.msg = msg;
+    msgAdapter.param = param;
     int err = write(socketData, &msgAdapter.buffer, sizeof(msgAdapter.buffer));
     STOP_ON_ERROR(err < 0);
-    printf("Sent: %d\n", msgAdapter.msg);
 }
 
 /**
@@ -211,7 +213,7 @@ static void actionSendMsg(int msg){
  *
  * @retval no retval
  */
-static void actionError(void) {
+static void actionError(Param param) {
     actionStop();
 }
 
@@ -220,7 +222,7 @@ static void actionError(void) {
  *
  * @retval no retval
  */
-static void actionStop(void) {
+static void actionStop(Param param) {
     if (socketListen)
         close(socketListen);
     if (socketData)
@@ -346,10 +348,10 @@ static mqd_t queue;
 /**
  * @brief Shape of the message to send/receive
  */
-typedef struct {
+struct MqMsgT{
     Event event;
     Param param;
-} MqMsg;
+};
 
 /**
  * @brief Wrapper of the message and a string
@@ -419,7 +421,7 @@ static void* postmanCommandoRun(void) {
         }
         else {
             act = stateMachine[currentState][msg.event].action;
-            ActionsTab[act](msg.param.value);
+            ActionsTab[act](msg.param);
             currentState = stateMachine[currentState][msg.event].destinationState;
         }
     }

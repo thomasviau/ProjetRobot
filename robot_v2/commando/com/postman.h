@@ -12,6 +12,8 @@ typedef struct PostmanCommandoT PostmanCommando;
 
 typedef union MsgAdapterT MsgAdapter;
 
+typedef struct MqMsgT MqMsg;
+
 typedef union ParamT Param;
 
 /**
@@ -53,5 +55,8 @@ extern void postmanCommandoStop(void);
  */
 
 extern void postmanCommandoFree(void);
+
+extern void postmanCommandoMqSend(MqMsg);
+
 
 #endif //ROBOT_V2_POSTMAN_H
