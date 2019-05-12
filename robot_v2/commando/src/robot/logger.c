@@ -22,7 +22,7 @@ static const Log emptyLog = {
 
 static Watchdog* watchdog;
 
-static void appendEvent(SensorState state, int speed) {
+static void appendLog(SensorState state, int speed) {
     if (logsCount == MAX_LOGS_COUNT)
         loggerClear();
 
@@ -36,7 +36,7 @@ static void appendEvent(SensorState state, int speed) {
 }
 
 static void loggerWdExpires(Watchdog *this) {
-    appendEvent(robotGetSensorState(), robotGetSpeed());
+    appendLog(robotGetSensorState(), robotGetSpeed());
 }
 
 void loggerStart() {
@@ -61,7 +61,7 @@ void loggerClear() {
 }
 
 void askLogsCount() {
-    setEventsCount(logsCount);
+    setLogsCount(logsCount);
 }
 
 void askLogs(int from, int to) {
@@ -71,5 +71,5 @@ void askLogs(int from, int to) {
         logsToSend[i] = robotLogs[from+i];
     };
 
-    setEvents(logsToSend);
+    setLogs(logsToSend);
 }

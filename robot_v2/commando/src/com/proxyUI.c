@@ -15,7 +15,7 @@ void setPilotState(PilotState pilotState){
     proxyUIEncode(param);
 }
 
-void setEvents(Log log[]){
+void setLogs(Log log[]){
     TRACE("setEvents");
     Param param = {
             .idMethod = 2,
@@ -24,7 +24,7 @@ void setEvents(Log log[]){
     proxyUIEncode(param);
 }
 
-void setEventsCount(int indice){
+void setLogsCount(int indice){
     TRACE("setEventsCount");
     Param param = {
             .idMethod = 3,
