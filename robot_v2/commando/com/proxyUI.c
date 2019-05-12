@@ -1,21 +1,14 @@
 #include "proxyUI.h"
 #include "postman.h"
+#include "../robot/logger.h"
+#include "../util.h"
 
 void proxyUIEncode(Param param){
     postmanCommandoSend(param);
 }
 
-void setPilotState(PilotState pilotState){
-    TRACE(setPilotState);
-    Param param = {
-            .idMethod = 1,
-            .pilotState = pilotState
-    };
-    proxyUIEncode(param);
-}
-
-void setEvents(int from, int to){
-    TRACE(setEvents);
+void setLogs(int from, int to){
+    TRACE(setLogs);
     Param param = {
             .idMethod = 2,
             .from = from,
@@ -24,8 +17,8 @@ void setEvents(int from, int to){
     proxyUIEncode(param);
 }
 
-void setEventsCount(int indice){
-    TRACE(setEventsCount);
+void setLogsCount(int indice){
+    TRACE(setLogsCount);
     Param param = {
             .idMethod = 3,
             .indice = indice

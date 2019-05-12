@@ -5,7 +5,7 @@ void proxyLoggerEncode(Param param){
     postmanTelcoSend(param);
 }
 
-void askEvents(int from, int to){
+void askLogs(int from, int to){
     Param param = {
             .idMethod = 1,
             .from = from,
@@ -14,10 +14,9 @@ void askEvents(int from, int to){
     proxyLoggerEncode(param);
 }
 
-void askEventsCount(int indice){
+void askLogsCount(){
     Param param = {
-            .idMethod = 2,
-            .indice = indice
+            .idMethod = 2
     };
     proxyLoggerEncode(param);
 }

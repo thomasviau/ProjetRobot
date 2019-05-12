@@ -1,8 +1,8 @@
 #ifndef LANGAGE_C_PROXYLOGGER_H
 #define LANGAGE_C_PROXYLOGGER_H
 
-extern void askEvents(int, int);
+extern void askLogs(int, int);
 
-extern void askEventsCount(int);
+extern void askLogsCount(int);
 
 #endif //LANGAGE_C_PROXYLOGGER_H

@@ -124,7 +124,7 @@ static const char * actionGetName(int i) {
  *
  * @retval no retval
  */
-static void actionNop(Param param) {
+static void actionNop(Param *param) {
     //noting to do
 }
 
@@ -133,7 +133,7 @@ static void actionNop(Param param) {
  *
  * @retval no retval
  */
-static void actionInit(Param param) {
+static void actionInit(Param *param) {
     socketListen = socket(AF_INET, SOCK_STREAM, 0);
     STOP_ON_ERROR(socketListen < 0);
     myAddress.sin_family = AF_INET;
@@ -147,7 +147,7 @@ static void actionInit(Param param) {
  *
  * @retval no retval
  */
-static void actionConnect(Param param) {
+static void actionConnect(Param *param) {
     int err = bind(socketListen, (struct sockaddr *)&myAddress, sizeof(myAddress));
     STOP_ON_ERROR(err < 0);
 
@@ -165,7 +165,7 @@ static void actionConnect(Param param) {
  *
  * @retval no retval
  */
-static void actionCreateReadThread(Param param) {
+static void actionCreateReadThread(Param *param) {
     int err = pthread_create(&thread, NULL, actionReceiveMsg, NULL);
     STOP_ON_ERROR(err == -1);
 }
@@ -175,7 +175,7 @@ static void actionCreateReadThread(Param param) {
  *
  * @retval no retval
  */
-static void* actionReceiveMsg(void){
+static void* actionReceiveMsg(Param *param){
     MsgAdapter msgAdapter;
     while (1){
         int err = read(socketData, &msgAdapter.buffer, sizeof(msgAdapter.buffer));
@@ -192,7 +192,7 @@ static void* actionReceiveMsg(void){
  *
  * @retval no retval
  */
-static void actionSendMsg(Param param){
+static void actionSendMsg(Param *param){
     MsgAdapter msgAdapter;
     msgAdapter.param = param;
     int err = write(socketData, &msgAdapter.buffer, sizeof(msgAdapter.buffer));
@@ -204,7 +204,7 @@ static void actionSendMsg(Param param){
  *
  * @retval no retval
  */
-static void actionError(Param param) {
+static void actionError(Param *param) {
     actionStop();
 }
 
@@ -213,7 +213,7 @@ static void actionError(Param param) {
  *
  * @retval no retval
  */
-static void actionStop(Param param) {
+static void actionStop(Param *param) {
     if (socketListen)
         close(socketListen);
     if (socketData)
@@ -223,7 +223,7 @@ static void actionStop(Param param) {
 /**
  * @brief Action pointer
  */
-typedef void (*ActionPtr)();
+typedef void (*ActionPtr)(Param*);
 
 /**
  * @brief List of functions to be pointed, one for each to transition [TO COMPLETE]

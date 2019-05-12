@@ -3,6 +3,7 @@
 
 #include "../util.h"
 #include "dispatcher.h"
+#include "../robot/pilot.h"
 
 
 /* ----------------------- NEW START STOP FREE -----------------------*/
