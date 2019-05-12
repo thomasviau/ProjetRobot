@@ -3,8 +3,8 @@
 
 extern void setPilotState(PilotState);
 
-extern void setEvents(int, int);
+extern void setLogs(int, int);
 
-extern void setEventsCount(int);
+extern void setLogsCount(int);
 
 #endif //ROBOT_V2_PROXYUI_H

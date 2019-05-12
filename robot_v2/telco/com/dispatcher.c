@@ -48,10 +48,10 @@ void dispatcherTelcoDecode(Param param) {
             setPilotState(param.pilotState);
             break;
         case 2:
-            setEvents(param.from,param.to);
+            setLogs(param.from,param.to);
             break;
         case 3:
-            setEventsCount(param.indice);
+            setLogsCount(param.indice);
             break;
     }
 }

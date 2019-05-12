@@ -20,8 +20,6 @@ typedef struct VelocityVectorT
     int power;
 } VelocityVector;
 
-
-
 extern void setVelocity(VelocityVector);
 
 extern void toggleEmergencyStop(void);
