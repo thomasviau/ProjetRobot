@@ -14,13 +14,18 @@ typedef enum {
 /**
  * @brief Velocity vector type
  */
-typedef struct VelocityVectorT {
+typedef struct VelocityVectorT
+{
     Direction dir;
     int power;
 } VelocityVector;
 
-extern void pilotSetVelocity(VelocityVector);
 
-extern void pilotCheck();
+
+extern void setVelocity(VelocityVector);
+
+extern void toggleEmergencyStop(void);
+
+extern void askPilotState(void);
 
 #endif //ROBOT_V2_PROXYPILOT_H

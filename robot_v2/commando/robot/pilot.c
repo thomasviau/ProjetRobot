@@ -13,6 +13,7 @@
 #include "../watchdog.h"
 #include "pilot.h"
 #include "robot.h"
+#include "../com/proxyUI.h"
 
 #define MQ_MSG_COUNT 10
 #define MQ_MSG_SIZE 256
@@ -441,6 +442,10 @@ Pilot pilotGetState() {
     return *pilot;
 }
 
+void pilotAskPilotState(void){
+    setPilotState(pilotGetState());
+}
+
 void pilotSetVelocity(VelocityVector vel) {
     MqMsg data = {
             .event = E_VELOCITY,
@@ -519,15 +524,15 @@ static void pilotEvaluateBump() {
     }
 }
 
-static int pilotHasBumped() {
+static int pilotHasBumped(void) {
     return ((robotGetSensorState().collision == BUMPED) ? 1 : 0);
 }
 
-static void pilotSetTimeout() {
+static void pilotSetTimeout(void) {
     watchdogStart(pilot->watchdog);
 }
 
-static void pilotResetTimeout() {
+static void pilotResetTimeout(void) {
     watchdogCancel(pilot->watchdog);
 }
 
@@ -537,5 +542,13 @@ static void pilotWdExpires(Watchdog *this) {
             .vel = pilot->speed
     };
     data.event = E_CHECK;
+    pilotMqSend(data);
+}
+
+static pilotToggleEmergencyStop(void){
+    MqMsg data = {
+            .event = E_TOGGLESTOP,
+            .vel = pilot->speed
+    };
     pilotMqSend(data);
 }

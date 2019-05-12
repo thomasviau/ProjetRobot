@@ -67,7 +67,7 @@ void remoteUIRun()
 
 void remoteUIDisplay()
 {
-    printf("Projet Robot - Thomas VIAU \n");
+    printf("Projet Robot - Thomas VIAU / Ageneau Quentin\n");
 }
 
 void remoteUICaptureChoice()

@@ -1,17 +1,31 @@
+#include "postman.h"
 #include "proxyPilot.h"
 
-static void encode();
-
-void pilotSetVelocity(VelocityVector vel) {
-
+void proxyPilotEncode(Param param){
+    postmanTelcoSend(param);
 }
 
-void pilotCheck() {
-    printf("Speed : %d\n", pilotGetState().speed);
-    printf("Luminosity : %f\n", pilotGetState().luminosity);
-    printf("Collision : %s\n", (pilotGetState().bump ? "yes" : "no"));
-};
+void setVelocity(VelocityVector vel){
+    Param param = {
+            .idMethod = 3,
+            .vel = vel
+    };
+    proxyPilotEncode(param);
+    TRACE(setVelocity);
+}
 
-static void encode() {
+void toggleEmergencyStop(void){
+    Param param = {
+            .idMethod = 4
+    };
+    proxyPilotEncode(param);
+    TRACE(toggleEmergencyStop);
+}
 
+void askPilotState(void){
+    Param param = {
+            .idMethod = 5
+    };
+    proxyPilotEncode(param);
+    TRACE(askPilotState);
 }

@@ -10,11 +10,14 @@
  */
 typedef struct PostmanCommandoT PostmanCommando;
 
-typedef union MsgAdapterT MsgAdapter;
-
-typedef struct MqMsgT MqMsg;
-
-typedef union ParamT Param;
+typedef union {
+    PilotState pilotState;
+    VelocityVector vel;
+    int from;
+    int to;
+    int indice;
+    int idMethod;
+} Param;
 
 /**
  * @brief postmanCommando class constructor
@@ -56,7 +59,7 @@ extern void postmanCommandoStop(void);
 
 extern void postmanCommandoFree(void);
 
-extern void postmanCommandoMqSend(MqMsg);
+extern void postmanCommandoSend(Param);
 
 
 #endif //ROBOT_V2_POSTMAN_H

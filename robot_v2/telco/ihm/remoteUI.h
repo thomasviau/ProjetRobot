@@ -5,26 +5,26 @@
  * Start RemoteUI and waits for the user's input until the user ask to quit
  *
  */
-extern void remoteUIStart();
+extern void remoteUIStart(void);
 
 /**
  * Stop RemoteUI
  *
  */
-extern void remoteUIStop();
+extern void remoteUIStop(void);
 
 
 /**
  * initialize in memory RemoteUI
  *
  */
-extern void remoteUINew();
+extern void remoteUINew(void);
 
 /**
  * destruct the RemoteUI from memory
  *
  */
-extern void remoteUIFree();
+extern void remoteUIFree(void);
 
 
 /**

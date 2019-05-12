@@ -28,21 +28,12 @@
 
 /* ----------------------- DEFINITION OF STRUCTURES -----------------------*/
 
-union MsgAdapterT{
+typedef union {
     char buffer[MSG_SIZE];
     Param param;
-};
+} MsgAdapter;
 
 struct PostmanCommandoT {};
-
-union ParamT {
-    PilotState pilotState;
-    VelocityVector vel;
-    int from;
-    int to;
-    int indice;
-    int idMethod;
-};
 
 int socketListen;
 int socketData;
@@ -189,7 +180,7 @@ static void* actionReceiveMsg(void){
     while (1){
         int err = read(socketData, &msgAdapter.buffer, sizeof(msgAdapter.buffer));
         STOP_ON_ERROR(err < 0);
-        dispatcheCommandoMqSend(msgAdapter.param);
+        dispatcherCommandoDecode(msgAdapter.param);
         if (msgAdapter.param == 0){
             break;
         }
@@ -348,10 +339,10 @@ static mqd_t queue;
 /**
  * @brief Shape of the message to send/receive
  */
-struct MqMsgT{
+typedef struct{
     Event event;
     Param param;
-};
+} MqMsg;
 
 /**
  * @brief Wrapper of the message and a string
@@ -490,4 +481,12 @@ void postmanCommandoFree(void) {
 
     free(this);
     TRACE("Free instance\n");
+}
+
+void postmanCommandoSend(param){
+    MqMsg mqMsg={
+            .event = E_SEND_MSG;
+            .param = param;
+    };
+    postmanCommandoMqSend(mqMsg);
 }

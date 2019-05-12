@@ -10,9 +10,14 @@
  */
 typedef struct PostmanTelcoT PostmanTelco;
 
-typedef union MsgAdapterT MsgAdapter;
-
-typedef union ParamT Param;
+typedef union {
+    PilotState pilotState;
+    VelocityVector vel;
+    int from;
+    int to;
+    int indice;
+    int idMethod;
+} Param;
 
 /**
  * @brief postmanTelco class constructor
@@ -53,5 +58,8 @@ extern void postmanTelcoStop(void);
  */
 
 extern void postmanTelcoFree(void);
+
+extern void postmanTelcoSend(Param);
+
 
 #endif //ROBOT_V2_POSTMAN_H

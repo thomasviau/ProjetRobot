@@ -28,29 +28,112 @@
 
 /* ----------------------- DEFINITION OF STRUCTURES -----------------------*/
 
-union MsgAdapterT{
+typedef union {
     char buffer[MSG_SIZE];
-    int msg;
-};
+    Param param;
+} MsgAdapter;
 
 struct PostmanTelcoT {};
-
-union ParamT {
-    int value;
-};
 
 int socketListen;
 int socketData;
 struct sockaddr_in myAddress;
 static pthread_t thread;
 
+/* ----------------------- PROTOYPES OF METHODS -----------------------*/
+
+static void actionStop(void);
+static void actionError(void);
+static void actionSendMsg(int msg);
+static void* actionReceiveMsg(void);
+static void actionCreateReadThread(void);
+static void actionConnect(void);
+static void actionInit(void);
+static void actionNop(void);
+
+/* ----------------------- STATE GENERATION -----------------------*/
+#define STATE_GENERATION S(S_FORGET) S(S_IDLE) S(S_INIT) S(S_CONNECT) S(S_RUNNING) S(S_DEATH) // states of your state machine
+#define S(x) x,
+
+/**
+ * @brief State enumeration
+ */
+typedef enum {
+    STATE_GENERATION
+    STATE_NB
+} State;
+
+#undef S
+
+#define S(x) #x,
+
+/**
+ * @brief List of states
+ */
+static const char * const kStateName[] = { STATE_GENERATION };
+#undef STATE_GENERATION
+#undef S
+
+/**
+ * @brief State name generator
+ *
+ * @param Index of the state
+ *
+ * @retval Name of the state
+ */
+static const char * stateGetName(int i) {
+    return kStateName[i];
+}
+
 /* ----------------------- ACTION GENERATION -----------------------*/
+#define ACTION_GENERATION S(A_NOP) S(A_INIT) S(A_CONNECT) S(A_CREATE_READ_THREAD) S(A_SEND_MSG) S(A_STOP) S(A_ERROR) // actions of your state machine
+#define S(x) x,
+
+/**
+ * @brief Action enumeration
+ */
+typedef enum {
+    ACTION_GENERATION
+    ACTION_NB
+} Action;
+
+#undef S
+
+#define S(x) #x,
+
+/**
+ * @brief List of actions
+ */
+static const char * const kActionName[] = { ACTION_GENERATION };
+#undef ACTION_GENERATION
+#undef S
+
+/**
+ * @brief Action name generator
+ *
+ * @param Index of the action
+ *
+ * @retval Name of the action
+ */
+static const char * actionGetName(int i) {
+    return kActionName[i];
+}
+
+/**
+ * @brief Function to call for a transition without any actions
+ *
+ * @retval no retval
+ */
+static void actionNop(Param param) {
+    //noting to do
+}
+
 /**
  * @brief Actions to do in the S_IDLE / S_INIT transition
  *
  * @retval no retval
  */
-static void actionInit(void) {
+static void actionInit(Param param) {
     socketListen = socket(AF_INET, SOCK_STREAM, 0);
     STOP_ON_ERROR(socketListen < 0);
     myAddress.sin_family = AF_INET;
@@ -64,7 +147,7 @@ static void actionInit(void) {
  *
  * @retval no retval
  */
-static void actionConnect(void) {
+static void actionConnect(Param param) {
     int err = bind(socketListen, (struct sockaddr *)&myAddress, sizeof(myAddress));
     STOP_ON_ERROR(err < 0);
 
@@ -82,7 +165,7 @@ static void actionConnect(void) {
  *
  * @retval no retval
  */
-static void actionCreateReadThread(void) {
+static void actionCreateReadThread(Param param) {
     int err = pthread_create(&thread, NULL, actionReceiveMsg, NULL);
     STOP_ON_ERROR(err == -1);
 }
@@ -97,10 +180,8 @@ static void* actionReceiveMsg(void){
     while (1){
         int err = read(socketData, &msgAdapter.buffer, sizeof(msgAdapter.buffer));
         STOP_ON_ERROR(err < 0);
-        printf("Received: %d\n", msgAdapter.msg);
-        //dispatcherTelcoDecode(msgAdapter.msg);
-
-        if (msgAdapter.msg == 0){
+        dispatcherTelcoDecode(msgAdapter.param);
+        if (msgAdapter.param == 0){
             break;
         }
     }
@@ -111,12 +192,11 @@ static void* actionReceiveMsg(void){
  *
  * @retval no retval
  */
-static void actionSendMsg(int msg){
+static void actionSendMsg(Param param){
     MsgAdapter msgAdapter;
-    msgAdapter.msg = msg;
+    msgAdapter.param = param;
     int err = write(socketData, &msgAdapter.buffer, sizeof(msgAdapter.buffer));
     STOP_ON_ERROR(err < 0);
-    printf("Sent: %d\n", msgAdapter.msg);
 }
 
 /**
@@ -124,7 +204,7 @@ static void actionSendMsg(int msg){
  *
  * @retval no retval
  */
-static void actionError(void) {
+static void actionError(Param param) {
     actionStop();
 }
 
@@ -133,7 +213,7 @@ static void actionError(void) {
  *
  * @retval no retval
  */
-static void actionStop(void) {
+static void actionStop(Param param) {
     if (socketListen)
         close(socketListen);
     if (socketData)
@@ -150,6 +230,105 @@ typedef void (*ActionPtr)();
  */
 static const ActionPtr ActionsTab[ACTION_NB] = {&actionNop, &actionInit, &actionConnect, &actionCreateReadThread, &actionSendMsg, &actionStop, &actionError};
 
+/* ----------------------- EVENT GENERATION -----------------------*/
+#define EVENT_GENERATION S(E_NOP) S(E_INIT) S(E_CONNECT) S(E_CREATE_READ_THREAD) S(E_SEND_MSG) S(E_STOP) S(E_ERROR) // events of your state machine
+#define S(x) x,
+
+/**
+ * @brief Event enumeration
+ */
+typedef enum {
+    EVENT_GENERATION
+    EVENT_NB
+} Event;
+
+#undef S
+
+#define S(x) #x,
+
+/**
+ * @brief List of events
+ */
+static const char * const kEventName[] = { EVENT_GENERATION };
+#undef EVENT_GENERATION
+#undef S
+
+/**
+ * @brief Event name generator
+ *
+ * @param Index of the event
+ *
+ * @retval Name of the event
+ */
+static const char * eventGetName(int i) {
+    return kEventName[i];
+}
+
+/* ----------------------- STATE MACHINE -----------------------*/
+
+/**
+ * @brief Transition type
+ */
+typedef struct {
+    State destinationState;
+    Action action;
+} Transition;
+
+/**
+ * @brief Current state of the state machine
+ */
+static State currentState;
+
+/**
+ * @brief State machine that defines all transitions
+ */
+static Transition stateMachine[STATE_NB][EVENT_NB] = {
+        [S_IDLE][E_INIT]= {S_INIT, A_INIT},
+        [S_INIT][E_CONNECT]={S_CONNECT, A_CONNECT},
+        [S_CONNECT][E_CREATE_READ_THREAD]= {S_RUNNING, A_CREATE_READ_THREAD},
+        [S_RUNNING][E_SEND_MSG]= {S_RUNNING, A_SEND_MSG},
+        [S_IDLE][E_ERROR]= {S_DEATH, A_ERROR},
+        [S_INIT][E_ERROR]= {S_DEATH, A_ERROR},
+        [S_CONNECT][E_ERROR]= {S_DEATH, A_ERROR},
+        [S_RUNNING][E_ERROR]= {S_DEATH, A_ERROR},
+        [S_IDLE][E_STOP]= {S_DEATH, A_STOP},
+        [S_INIT][E_STOP]= {S_DEATH, A_STOP},
+        [S_CONNECT][E_STOP]= {S_DEATH, A_STOP},
+        [S_RUNNING][E_STOP]= {S_DEATH, A_STOP}
+};
+
+/**
+ * @brief State machine checker
+ *
+ * Generates a .puml file to check if the correct state machine is running
+ *
+ * @retval no retval
+ */
+
+static void postmanTelcoCheckSM(void) {
+    int iState, iEvent;
+    FILE *stdPlant;
+
+    stdPlant = fopen("MAE_PostmanTelco.puml", "w+");
+
+    fprintf(stdPlant, "%s\n", "@startuml");
+    fprintf(stdPlant,"[*] -->%s\n", stateGetName(1));
+
+    for(iState = 0; iState < STATE_NB; iState++) {
+        for(iEvent = 0; iEvent < EVENT_NB; iEvent++) {
+            if(stateMachine[iState][iEvent].destinationState != S_FORGET){
+                fprintf(stdPlant,"%s --> %s: %s / %s \n",
+                        stateGetName(iState),
+                        stateGetName(stateMachine[iState][iEvent].destinationState),
+                        eventGetName(iEvent),
+                        actionGetName(stateMachine[iState][iEvent].action ) ) ;
+            }
+        }
+    }
+
+    fprintf(stdPlant, "%s\n", "@enduml");
+    fclose(stdPlant);
+}
 
 /* ----------------------- MESSAGE QUEUE -----------------------*/
 /**
@@ -160,7 +339,7 @@ static mqd_t queue;
 /**
  * @brief Shape of the message to send/receive
  */
-typedef struct {
+typedef struct{
     Event event;
     Param param;
 } MqMsg;
@@ -233,7 +412,7 @@ static void* postmanTelcoRun(void) {
         }
         else {
             act = stateMachine[currentState][msg.event].action;
-            ActionsTab[act](msg.param.value);
+            ActionsTab[act](msg.param);
             currentState = stateMachine[currentState][msg.event].destinationState;
         }
     }
@@ -244,7 +423,10 @@ static void* postmanTelcoRun(void) {
 /**
  * @brief Thread that will run the state machine
  */
-static pthread_t runThread;
+static pthread_t readThread;
+
+static pthread_t writeThread;
+
 
 /**
  * @brief Instance of the postmanTelco class
@@ -299,4 +481,12 @@ void postmanTelcoFree(void) {
 
     free(this);
     TRACE("Free instance\n");
+}
+
+void postmanTelcoSend(param){
+    MqMsg mqMsg={
+            .event = E_SEND_MSG;
+            .param = param;
+    };
+    postmanTelcoMqSend(mqMsg);
 }
