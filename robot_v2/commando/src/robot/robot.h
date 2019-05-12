@@ -1,8 +1,6 @@
 #ifndef ROBOT_V2_ROBOT_H
 #define ROBOT_V2_ROBOT_H
 
-#include "prose.h"
-
 typedef enum {
     NO_BUMP=0,
     BUMPED
@@ -13,14 +11,7 @@ typedef struct SensorStateT {
     float luminosity;
 } SensorState;
 
-typedef struct RobotT {
-    Motor *mG;
-    Motor *mD;
-    LightSensor *lightSensor;
-    ContactSensor *contactSensor;
-    ContactSensor *floorSensor;
-    SensorState *sensorState;
-} Robot;
+typedef struct RobotT Robot;
 
 /**
  * Start the Robot (initialize communication and open port)

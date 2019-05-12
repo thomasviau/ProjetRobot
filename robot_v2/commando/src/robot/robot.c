@@ -10,6 +10,15 @@
 #define FRONT_BUMPER S3
 #define FLOOR_SENSOR S2
 
+struct RobotT {
+    Motor *mG;
+    Motor *mD;
+    LightSensor *lightSensor;
+    ContactSensor *contactSensor;
+    ContactSensor *floorSensor;
+    SensorState *sensorState;
+};
+
 static Robot* robot;
 static SensorState* sensorState;
 

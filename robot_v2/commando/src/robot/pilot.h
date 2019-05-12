@@ -22,6 +22,12 @@ typedef struct VelocityVectorT
     int power;
 } VelocityVector;
 
+typedef struct{
+    int speed;
+    int collision;
+    float luminosity;
+} PilotState;
+
 /**
  * @brief Pilot type
  */
@@ -104,5 +110,7 @@ extern void pilotCheck();
 extern void pilotToggleEmergencyStop();
 
 extern void pilotCheckSM();
+
+extern void pilotAskPilotState(void);
 
 #endif //ROBOT_V2_PILOT_H

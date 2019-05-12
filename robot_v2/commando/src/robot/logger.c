@@ -1,5 +1,7 @@
 #include <pthread.h>
 #include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "logger.h"
 #include "../watchdog.h"
@@ -7,11 +9,6 @@
 
 #define TIMEOUT_LOGGER (0.25*1000*1000)
 #define MAX_LOGS_COUNT 1000
-
-struct Log_t {
-    SensorState state;
-    int speed;
-};
 
 static int logsCount;
 
@@ -29,10 +26,11 @@ static void appendEvent(SensorState state, int speed) {
     if (logsCount == MAX_LOGS_COUNT)
         loggerClear();
 
-    robotLogs[logsCount] = {
+    Log log = {
             .state = state,
             .speed = speed
     };
+    robotLogs[logsCount] = log;
 
     logsCount++;
 }
@@ -51,6 +49,7 @@ void loggerStart() {
 void loggerStop() {
     watchdogCancel(watchdog);
     watchdogDestroy(watchdog);
+    free(watchdog);
 }
 
 void loggerClear() {
@@ -62,7 +61,7 @@ void loggerClear() {
 }
 
 void askLogsCount() {
-    setLogsCount(logsCount);
+    setEventsCount(logsCount);
 }
 
 void askLogs(int from, int to) {
@@ -72,5 +71,5 @@ void askLogs(int from, int to) {
         logsToSend[i] = robotLogs[from+i];
     };
 
-    setLogs(logsToSend);
+    setEvents(logsToSend);
 }

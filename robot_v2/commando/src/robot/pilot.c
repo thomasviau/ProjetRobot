@@ -443,7 +443,13 @@ Pilot pilotGetState() {
 }
 
 void pilotAskPilotState(void){
-    setPilotState(pilotGetState());
+    pilotGetState();
+    PilotState pilotState = {
+            .collision = pilot->bump,
+            .luminosity = pilot->luminosity,
+            .speed = pilot->speed
+    };
+    setPilotState(pilotState);
 }
 
 void pilotSetVelocity(VelocityVector vel) {
@@ -461,7 +467,7 @@ void pilotCheck() {
     printf("Collision : %s\n", (pilotGetState().bump ? "yes" : "no"));
 };
 
-void pilotToggleEmergencyStop() {
+void pilotToggleEmergencyStop(void) {
     MqMsg data = {
             .event = E_TOGGLESTOP,
             .vel = velocityZero
@@ -507,19 +513,14 @@ static void pilotEvaluateVelocity() {
 }
 
 static void pilotEvaluateBump() {
+    MqMsg data;
     if (pilot->bump) {
-        MqMsg data = {
-                .event = E_BUMP,
-                .vel = velocityZero
-        };
-
+        data.event = E_BUMP;
+        data.vel = velocityZero;
         pilotMqSend(data);
     } else {
-        MqMsg data = {
-                .event = E_NOBUMP,
-                .vel = pilot->speed
-        };
-
+        data.event = E_NOBUMP;
+        data.vel.power = pilot->speed;
         pilotMqSend(data);
     }
 }
@@ -537,18 +538,8 @@ static void pilotResetTimeout(void) {
 }
 
 static void pilotWdExpires(Watchdog *this) {
-    MqMsg data = {
-            .event = E_CHECK,
-            .vel = pilot->speed
-    };
+    MqMsg data;
     data.event = E_CHECK;
-    pilotMqSend(data);
-}
-
-static pilotToggleEmergencyStop(void){
-    MqMsg data = {
-            .event = E_TOGGLESTOP,
-            .vel = pilot->speed
-    };
+    data.vel.power = pilot->speed;
     pilotMqSend(data);
 }

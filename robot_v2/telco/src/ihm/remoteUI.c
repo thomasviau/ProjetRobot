@@ -1,5 +1,5 @@
 #include "remoteUI.h"
-#include "../com/proxyPilot.h";
+#include "../com/proxyPilot.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -40,19 +40,19 @@ static int getch(void) {
     return(c);
 }
 
-void remoteUINew() {
+void remoteUINew(void) {
 
 }
 
-void remoteUIStart() {
+void remoteUIStart(void) {
     remoteUIRun();
 }
 
-void remoteUIStop() {
+void remoteUIStop(void) {
 
 }
 
-void remoteUIFree() {
+void remoteUIFree(void) {
 
 }
 

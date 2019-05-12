@@ -1,9 +1,8 @@
-//
-// Created by viauthom on 06/05/19.
-//
-
 #ifndef ROBOT_V2_POSTMAN_H
 #define ROBOT_V2_POSTMAN_H
+
+#include "../robot/pilot.h"
+#include "../robot/logger.h"
 
 /**
  * @brief postmanCommando type
@@ -13,6 +12,7 @@ typedef struct PostmanCommandoT PostmanCommando;
 typedef union {
     PilotState pilotState;
     VelocityVector vel;
+    Log *log;
     int from;
     int to;
     int indice;

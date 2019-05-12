@@ -1,9 +1,11 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-#include "../util.h"
 #include "dispatcher.h"
+#include "postman.h"
 #include "../robot/pilot.h"
+#include "../util.h"
+
 
 
 /* ----------------------- NEW START STOP FREE -----------------------*/
@@ -14,7 +16,6 @@ DispatcherCommando *dispatcherCommando;
 
 void dispatcherCommandoNew(void) {
     dispatcherCommando = (DispatcherCommando*)malloc (sizeof(DispatcherCommando));
-    STOP_ON_ERROR(dispatcherCommando == NULL);
 }
 
 void dispatcherCommandoStart(void) {}
@@ -28,27 +29,27 @@ void dispatcherCommandoFree(void) {
 /* ----------------------- DECODE AND ACTIONS METHODS -----------------------*/
 
 void askEvents(int from, int to){
-    TRACE(askEvents);
+    TRACE("askEvents");
     //TODO
 }
 
 void askEventsCount(int indice){
-    TRACE(askEventsCount);
+    TRACE("askEventsCount");
     //TODO
 }
 
 void setVelocity(VelocityVector vel){
-    TRACE(setVelocity);
+    TRACE("setVelocity");
     pilotSetVelocity(vel);
 }
 
 void toggleEmergencyStop(void){
-    TRACE(toggleEmergencyStop);
+    TRACE("toggleEmergencyStop");
     pilotToggleEmergencyStop();
 }
 
 void askPilotState(void){
-    TRACE(askPilotState);
+    TRACE("askPilotState");
     pilotAskPilotState();
 }
 
