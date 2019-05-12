@@ -3,7 +3,10 @@
 
 #include "robot.h"
 
-typedef struct Log_t Log;
+typedef struct {
+    SensorState state;
+    int speed;
+} Log;
 
 extern void loggerStart();
 

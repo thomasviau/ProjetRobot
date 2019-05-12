@@ -14,7 +14,7 @@
 #include <netinet/in.h>
 
 #include "../util.h"
-#include "proxyPilot.h"
+#include "proxyUI.h"
 #include "dispatcher.h"
 #include "postman.h"
 
@@ -39,17 +39,6 @@ int socketListen;
 int socketData;
 struct sockaddr_in myAddress;
 static pthread_t thread;
-
-/* ----------------------- PROTOYPES OF METHODS -----------------------*/
-
-static void actionStop(void);
-static void actionError(void);
-static void actionSendMsg(int msg);
-static void* actionReceiveMsg(void);
-static void actionCreateReadThread(void);
-static void actionConnect(void);
-static void actionInit(void);
-static void actionNop(void);
 
 /* ----------------------- STATE GENERATION -----------------------*/
 #define STATE_GENERATION S(S_FORGET) S(S_IDLE) S(S_INIT) S(S_CONNECT) S(S_RUNNING) S(S_DEATH) // states of your state machine
@@ -161,16 +150,6 @@ static void actionConnect(Param param) {
 }
 
 /**
- * @brief Actions to do in the S_CONNECT / S_RUNNING transition
- *
- * @retval no retval
- */
-static void actionCreateReadThread(Param param) {
-    int err = pthread_create(&thread, NULL, actionReceiveMsg, NULL);
-    STOP_ON_ERROR(err == -1);
-}
-
-/**
  * @brief Thread that read
  *
  * @retval no retval
@@ -181,10 +160,21 @@ static void* actionReceiveMsg(void){
         int err = read(socketData, &msgAdapter.buffer, sizeof(msgAdapter.buffer));
         STOP_ON_ERROR(err < 0);
         dispatcherCommandoDecode(msgAdapter.param);
-        if (msgAdapter.param == 0){
+        if (msgAdapter.param.idMethod == -1){
             break;
         }
     }
+    return 0;
+}
+
+/**
+ * @brief Actions to do in the S_CONNECT / S_RUNNING transition
+ *
+ * @retval no retval
+ */
+static void actionCreateReadThread(Param param) {
+    int err = pthread_create(&thread, NULL, actionReceiveMsg, NULL);
+    STOP_ON_ERROR(err == -1);
 }
 
 /**
@@ -204,15 +194,6 @@ static void actionSendMsg(Param param){
  *
  * @retval no retval
  */
-static void actionError(Param param) {
-    actionStop();
-}
-
-/**
- * @brief Actions to do in the * / S_DEATH transition
- *
- * @retval no retval
- */
 static void actionStop(Param param) {
     if (socketListen)
         close(socketListen);
@@ -221,9 +202,18 @@ static void actionStop(Param param) {
 }
 
 /**
+ * @brief Actions to do in the * / S_DEATH transition
+ *
+ * @retval no retval
+ */
+static void actionError(Param param) {
+    actionStop(param);
+}
+
+/**
  * @brief Action pointer
  */
-typedef void (*ActionPtr)();
+typedef void (*ActionPtr)(Param);
 
 /**
  * @brief List of functions to be pointed, one for each to transition [TO COMPLETE]
@@ -367,9 +357,6 @@ static MqMsg postmanCommandoMqReceive(void) {
     STOP_ON_ERROR(err != sizeof (msg.toString));
 
     //mq_close(queue);
-
-    printf("queue message sent : %d\n",msg.data.param.value);
-
     return msg.data;
 }
 
@@ -390,8 +377,6 @@ static void postmanCommandoMqSend(MqMsg aMsg) {
     STOP_ON_ERROR(err);
 
     //mq_close(queue);
-
-    printf("queue message sent : %d\n",msg.data.param.value);
 }
 
 /* ----------------------- RUN FUNCTION -----------------------*/
@@ -423,9 +408,7 @@ static void* postmanCommandoRun(void) {
 /**
  * @brief Thread that will run the state machine
  */
-static pthread_t readThread;
-
-static pthread_t writeThread;
+static pthread_t runThread;
 
 
 /**
@@ -483,10 +466,10 @@ void postmanCommandoFree(void) {
     TRACE("Free instance\n");
 }
 
-void postmanCommandoSend(param){
+void postmanCommandoSend(Param param){
     MqMsg mqMsg={
-            .event = E_SEND_MSG;
-            .param = param;
+            .event = E_SEND_MSG,
+            .param = param
     };
     postmanCommandoMqSend(mqMsg);
 }

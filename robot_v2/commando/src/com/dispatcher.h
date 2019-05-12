@@ -5,7 +5,9 @@
 #ifndef ROBOT_V2_DISPATCHER_H
 #define ROBOT_V2_DISPATCHER_H
 
-typedef struct DispatcherCommando DispatcherCommando;
+#include "postman.h"
+
+typedef struct DispatcherCommandoT DispatcherCommando;
 
 /**
  * @brief dispatcherCommando class constructor
@@ -50,6 +52,6 @@ extern void dispatcherCommandoFree(void);
  *
  * @retval no retval
  */
-extern void dispatcherCommandoDecode(int);
+extern void dispatcherCommandoDecode(Param);
 
 #endif //ROBOT_V2_DISPATCHER_H
